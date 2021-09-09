@@ -17,6 +17,18 @@ actionsNeg = ['pokes', 'snaps', 'gestures', 'points fingers', 'kicks', 'jabs', '
 actionsPos = ['heals', 'eats an apple', 'wipes sweat', 'drinks a can of coke', 'downs an energy drink', 
                 'grabs a sandwich', 'lets out a battle cry']
 battleDesc = ['gruelling', 'gruesome', 'harrowing', 'epic', 'logic-defying', 'earth-shattering']
+# this is a dictionary 
+numberDict = {1:'One', 2:'Two', 3:'Three', 4:'Four', 5:'Five',
+                6: 'Six', 7: 'Seven', 8: 'Eight', 9: 'Nine', 10: 'Ten',}
+# game balancing and configuration
+numRounds = 10 # sets the number of rounds
+sleepDelay = 1 # configures the delay for each round
+# this is the range of health reduction for each round [min, max]
+# the max damage is expressed as a function of the number of rounds
+healthReduceRangeList = [0.1, (100.0/numRounds)+numRounds*1.5]
+# this is the range of health that can be restored per round [min, max]
+# the max restore is expressed as a function of the max damage
+healthIncreaseRangeList = [0.1, healthReduceRangeList[1]*0.1]
 
 def randListItem(inList):
     '''
@@ -32,11 +44,10 @@ def introBanner():
     '''
         prints intro banner
     '''
-    introStr =  '-------------------------\n'
-    introStr += 'Five Rounds to the Ground\n'
-    introStr += '-------------------------\n'
+    introStr = '{} Rounds to the Ground'.format(numberDict[numRounds])
+    dashes = '-'*len(introStr)
         
-    print('\n'*2+introStr)
+    print('\n\n{}\n{}\n{}\n'.format(dashes, introStr, dashes))
     return
 # end def introBanner()
 
@@ -72,9 +83,10 @@ def statsReport(pChar, pHealth, eChar, eHealth):
 
     return - None
     '''
-    print('Player: {} (hp: {:0.2f})'.format(pChar, pHealth))
-    print('Enemy: {} (hp: {:0.2f})'.format(eChar, eHealth))
-    return
+    returnStr =  'Player: {} (hp: {:0.2f})\n'.format(pChar, pHealth)
+    returnStr += 'Enemy: {} (hp: {:0.2f})'.format(eChar, eHealth)
+    # print(returnStr)
+    return returnStr
 # end of def statsReport()
 
 def actionDamageMessage(char1, char2, damage):
@@ -112,15 +124,28 @@ def battleEndSummary(playerChar, playerHealth, enemyChar, enemyHealth, numberOfR
     print(endMsg)
     print('-' * len(endMsg))
 
+    print(statsReport(playerChar, playerHealth, enemyChar, enemyHealth))
+
     if playerHealth<=0 and enemyHealth<=0:
         defeatStr = '{} and {} are both dead!'.format(playerChar, enemyChar)
     else:
+        # actionVerb refers to how the defeat will be mentioned
+        actionVerb = randListItem(['defeated', 'beaten', 'overcome', 'overpowered'])
+        if playerHealth <= 0 or enemyHealth <= 0:
+            actionVerb = 'killed'
+        elif abs(playerHealth - enemyHealth) > 25:
+            actionVerb = randListItem(['destroyed', 'obliterated', 'decisively defeated', 'vanquished', 
+                                        'crushed', 'overwhelmed'])
+        # end if playerHealth <= 0 ...
+
         if playerHealth > enemyHealth:
-            defeatStr = '{} has defeated {}!'.format(playerChar, enemyChar)
+            defeatStr = '{} has {} {}!'.format(playerChar, actionVerb, enemyChar)
         else:
-            defeatStr = '{} has been defeated by {}'.format(playerChar, enemyChar)
-    print(defeatStr)
-    print('\n')
+            defeatStr = '{} has been {} by {}'.format(playerChar, actionVerb, enemyChar)
+        # end if playerHealth > enemyHealth
+    # end if playerhealth <= 0
+
+    print(defeatStr + '\n')
     return
 # end def battleEndSummary
 
@@ -154,7 +179,8 @@ enemyHealth = 100
 # print (enemyChar)
 
 # -- start Stats
-statsReport(playerChar, playerHealth, enemyChar, enemyHealth)
+# statusReport returns a string to be printed
+print(statsReport(playerChar, playerHealth, enemyChar, enemyHealth))
 print('')
 
 # --
@@ -162,14 +188,8 @@ random.seed(time.time()+3.32)
 attitude = randListItem(attitudesList)
 print ('The {} approaches the {} with {}'.format(playerChar, enemyChar, attitude))
 
-sleepDelay = 5 # configures the delay for each round
-# this dictionary
-numberDict = {1:'One', 2:'Two', 3:'Three', 4:'Four', 5:'Five'}
-# this is the range of health reduction for each round
-healthReduceRangeList = [0.1, 50]
-healthIncreaseRangeList = [0.1, 10]
 roundsCounter = 0
-for this_round in range(5):
+for this_round in range(numRounds):
     roundNumStr = 'Round {}'.format(numberDict[this_round+1])
     print('-' * len(roundNumStr))
     print(roundNumStr)
@@ -211,7 +231,7 @@ for this_round in range(5):
     actionDamageMessage(enemyChar, playerChar, damageEnemy)
     print('')
 
-    statsReport(playerChar, playerHealth, enemyChar, enemyHealth)
+    print(statsReport(playerChar, playerHealth, enemyChar, enemyHealth))
     print('')
     time.sleep(sleepDelay)
 
