@@ -97,7 +97,8 @@ def battleEndSummary(playerChar, playerHealth, enemyChar, enemyHealth, numberOfR
             defeatStr = defeatStr.format(playerChar, enemyChar)
         else:
             defeatStr = defeatStr.format(enemyChar, playerChar)
-    print (defeatStr)
+    print(defeatStr)
+    print('\n')
     return
 # end def battleEndSummary
 
@@ -143,7 +144,7 @@ sleepDelay = 1 # configures the delay for each round
 # this dictionary
 numberDict = {1:'One', 2:'Two', 3:'Three', 4:'Four', 5:'Five'}
 # this is the range of health reduction for each round
-healthReduceRangeList = [0, 55]
+healthReduceRangeList = [0, 45]
 roundsCounter = 0
 for this_round in range(5):
     print('-----')
