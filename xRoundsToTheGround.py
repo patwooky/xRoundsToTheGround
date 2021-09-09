@@ -14,7 +14,9 @@ attitudesList = ['disdain', 'apprehension', 'confidence', 'a murderous stare', '
                 'a look of surprise', 'a twinkle in the eyes']
 actionsNeg = ['pokes', 'snaps', 'gestures', 'points fingers', 'kicks', 'jabs', 'fires projectiles', 'jeers', 
                 'hurls insults', 'throws punches', 'takes a swipe', 'stares', 'claws', 'throws self']
-actionsPos = ['heals', 'recovers']
+actionsPos = ['heals', 'eats an apple', 'wipes sweat', 'drinks a can of coke', 'downs an energy drink', 
+                'grabs a sandwich', 'lets out a battle cry']
+battleDesc = ['gruelling', 'gruesome', 'harrowing', 'epic', 'logic-defying', 'earth-shattering']
 
 def randListItem(inList):
     '''
@@ -81,13 +83,16 @@ def actionDamageMessage(char1, char2, damage):
     Using char1 and char2 in the function we can re-use this function for player towards enemy
     and enemy towards player.
 
-    char1 - <str> first character's name
-    char2 - <str> second character's name
+    char1 - <str> first character that is receiving the damage
+    char2 - <str> second character that is dealing the damage
     damage - <float/int> the damage dealt
 
     return None
     '''
-    finalStr = '{} {} at {}, dealing {:0.2f} damage!'.format(char1, randListItem(actionsNeg), char2, damage)
+    if damage >= 0:
+        finalStr = '{} {} at {}, dealing {:0.2f} damage!'.format(char2, randListItem(actionsNeg), char1, abs(damage))
+    else:
+        finalStr = '{} {} and recovers {:0.2f} points of health!'.format(char1, randListItem(actionsPos), abs(damage))
     print(finalStr)
     return
 # end def actionDamageMessage
@@ -102,17 +107,18 @@ def battleEndSummary(playerChar, playerHealth, enemyChar, enemyHealth, numberOfR
     enemyHealth - <float> player's health
     numberOfRounds - <int> number of rounds that has elapsed
     '''
-    print('-----------------------------------------')
-    print('The gruelling battle ended in {} rounds'.format(numberOfRounds))
-    print('-----------------------------------------')
+    endMsg = 'The {} battle ended in {} rounds'.format(randListItem(battleDesc), numberOfRounds)
+    print('-' * len(endMsg))
+    print(endMsg)
+    print('-' * len(endMsg))
 
     if playerHealth<=0 and enemyHealth<=0:
         defeatStr = '{} and {} are both dead!'.format(playerChar, enemyChar)
     else:
-        if playerHealth>enemyHealth:
+        if playerHealth > enemyHealth:
             defeatStr = '{} has defeated {}!'.format(playerChar, enemyChar)
         else:
-            defeatStr = '{} has been defeated by {}'.format(enemyChar, playerChar)
+            defeatStr = '{} has been defeated by {}'.format(playerChar, enemyChar)
     print(defeatStr)
     print('\n')
     return
@@ -156,11 +162,12 @@ random.seed(time.time()+3.32)
 attitude = randListItem(attitudesList)
 print ('The {} approaches the {} with {}'.format(playerChar, enemyChar, attitude))
 
-sleepDelay = 4 # configures the delay for each round
+sleepDelay = 5 # configures the delay for each round
 # this dictionary
 numberDict = {1:'One', 2:'Two', 3:'Three', 4:'Four', 5:'Five'}
 # this is the range of health reduction for each round
-healthReduceRangeList = [0, 45]
+healthReduceRangeList = [0.1, 50]
+healthIncreaseRangeList = [0.1, 10]
 roundsCounter = 0
 for this_round in range(5):
     roundNumStr = 'Round {}'.format(numberDict[this_round+1])
@@ -170,12 +177,38 @@ for this_round in range(5):
     
     playerHealthOld = playerHealth
     enemyHealthOld = enemyHealth
-    # get randomised health reduction by calling healthReduce()
-    playerHealth = healthReduce(playerHealth, healthReduceRangeList)
-    enemyHealth = healthReduce(enemyHealth, healthReduceRangeList)
+    
+    damagePlayer = 0
+    # decides if it is a damage or a heal, healChance is a normalised healing percentage
+    healChance = 0.2
+    
+    # calculate player damage
+    randHeal = random.random()
+    # print('randheal is {}'.format(randHeal))
+    if randHeal <= (healChance):
+        # char heals himself
 
-    actionDamageMessage(playerChar, enemyChar, abs(playerHealthOld-playerHealth))
-    actionDamageMessage(enemyChar, playerChar, abs(enemyHealthOld-enemyHealth))
+        # takes the health difference of a regular damage, divide by 2 and use it as a health increase
+        damagePlayer = -(playerHealthOld - healthReduce(playerHealth, healthIncreaseRangeList))
+    else:
+        # get randomised health reduction by calling healthReduce()
+        damagePlayer = playerHealthOld - healthReduce(playerHealth, healthReduceRangeList)    
+    playerHealth = playerHealthOld - damagePlayer
+    actionDamageMessage(playerChar, enemyChar, damagePlayer)
+    
+    # calculate enemy damage
+    randHeal = random.random()
+    # print('randheal is {}'.format(randHeal))
+    if randHeal <= (healChance):
+        # char heals himself
+
+        # takes the health difference of a regular damage, divide by 2 and use it as a health increase
+        damageEnemy = -(enemyHealthOld - healthReduce(enemyHealth, healthIncreaseRangeList))
+    else:
+        # get randomised health reduction by calling healthReduce()
+        damageEnemy = enemyHealthOld - healthReduce(enemyHealth, healthReduceRangeList) 
+    enemyHealth = enemyHealthOld - damageEnemy
+    actionDamageMessage(enemyChar, playerChar, damageEnemy)
     print('')
 
     statsReport(playerChar, playerHealth, enemyChar, enemyHealth)
@@ -193,5 +226,5 @@ for this_round in range(5):
     if doubleKoFlag:
         break
 # end for this_round...
-
+print('\n')
 battleEndSummary(playerChar, playerHealth, enemyChar, enemyHealth, roundsCounter)
