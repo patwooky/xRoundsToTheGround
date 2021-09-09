@@ -13,7 +13,7 @@ attitudesList = ['disdain', 'apprehension', 'confidence', 'a murderous stare', '
                 'a sad look', 'irritation', 'remorse', 'amusement', 'confidence', 'disgust', 
                 'a look of surprise', 'a twinkle in the eyes']
 actionsNeg = ['pokes', 'snaps', 'gestures', 'points fingers', 'kicks', 'jabs', 'fires projectiles', 'jeers', 
-                'hurls insults', 'throws punches']
+                'hurls insults', 'throws punches', 'takes a swipe', 'stares', 'claws', 'throws self']
 actionsPos = ['heals', 'recovers']
 
 def randListItem(inList):
@@ -30,12 +30,11 @@ def introBanner():
     '''
         prints intro banner
     '''
-    introStr = '''
--------------------------
-Five Rounds to the Ground
--------------------------
-    '''
-    print(introStr)
+    introStr =  '-------------------------\n'
+    introStr += 'Five Rounds to the Ground\n'
+    introStr += '-------------------------\n'
+        
+    print('\n'*2+introStr)
     return
 # end def introBanner()
 
@@ -59,6 +58,7 @@ def healthReduce(inHealth, reduceMinMaxList):
     reduceAmt = random.random() * (reduceMax - reduceMin)
     outHealth = inHealth - reduceAmt # reduce inHealth by reduceAmt
     return outHealth
+# end def healthReduce()
 
 def statsReport(pChar, pHealth, eChar, eHealth):
     '''
@@ -74,6 +74,23 @@ def statsReport(pChar, pHealth, eChar, eHealth):
     print('Enemy: {} (hp: {:0.2f})'.format(eChar, eHealth))
     return
 # end of def statsReport()
+
+def actionDamageMessage(char1, char2, damage):
+    '''
+    Prints a damage dealt message.
+    Using char1 and char2 in the function we can re-use this function for player towards enemy
+    and enemy towards player.
+
+    char1 - <str> first character's name
+    char2 - <str> second character's name
+    damage - <float/int> the damage dealt
+
+    return None
+    '''
+    finalStr = '{} {} at {}, dealing {:0.2f} damage!'.format(char1, randListItem(actionsNeg), char2, damage)
+    print(finalStr)
+    return
+# end def actionDamageMessage
 
 def battleEndSummary(playerChar, playerHealth, enemyChar, enemyHealth, numberOfRounds):
     '''
@@ -92,11 +109,10 @@ def battleEndSummary(playerChar, playerHealth, enemyChar, enemyHealth, numberOfR
     if playerHealth<=0 and enemyHealth<=0:
         defeatStr = '{} and {} are both dead!'.format(playerChar, enemyChar)
     else:
-        defeatStr = '{} has defeated {}!'
         if playerHealth>enemyHealth:
-            defeatStr = defeatStr.format(playerChar, enemyChar)
+            defeatStr = '{} has defeated {}!'.format(playerChar, enemyChar)
         else:
-            defeatStr = defeatStr.format(enemyChar, playerChar)
+            defeatStr = '{} has been defeated by {}'.format(enemyChar, playerChar)
     print(defeatStr)
     print('\n')
     return
@@ -140,20 +156,27 @@ random.seed(time.time()+3.32)
 attitude = randListItem(attitudesList)
 print ('The {} approaches the {} with {}'.format(playerChar, enemyChar, attitude))
 
-sleepDelay = 1 # configures the delay for each round
+sleepDelay = 4 # configures the delay for each round
 # this dictionary
 numberDict = {1:'One', 2:'Two', 3:'Three', 4:'Four', 5:'Five'}
 # this is the range of health reduction for each round
 healthReduceRangeList = [0, 45]
 roundsCounter = 0
 for this_round in range(5):
-    print('-----')
-    print ('Round {}'.format(numberDict[this_round+1]))
-    print('-----')
+    roundNumStr = 'Round {}'.format(numberDict[this_round+1])
+    print('-' * len(roundNumStr))
+    print(roundNumStr)
+    print('-' * len(roundNumStr))
     
+    playerHealthOld = playerHealth
+    enemyHealthOld = enemyHealth
     # get randomised health reduction by calling healthReduce()
     playerHealth = healthReduce(playerHealth, healthReduceRangeList)
     enemyHealth = healthReduce(enemyHealth, healthReduceRangeList)
+
+    actionDamageMessage(playerChar, enemyChar, abs(playerHealthOld-playerHealth))
+    actionDamageMessage(enemyChar, playerChar, abs(enemyHealthOld-enemyHealth))
+    print('')
 
     statsReport(playerChar, playerHealth, enemyChar, enemyHealth)
     print('')
