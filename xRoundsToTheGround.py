@@ -125,6 +125,7 @@ def battleEndSummary(playerChar, playerHealth, enemyChar, enemyHealth, numberOfR
     print('-' * len(endMsg))
 
     print(statsReport(playerChar, playerHealth, enemyChar, enemyHealth))
+    healthDifference = abs(playerHealth - enemyHealth)
 
     if playerHealth<=0 and enemyHealth<=0:
         defeatStr = '{} and {} are both dead!'.format(playerChar, enemyChar)
@@ -133,8 +134,8 @@ def battleEndSummary(playerChar, playerHealth, enemyChar, enemyHealth, numberOfR
         actionVerb = randListItem(['defeated', 'beaten', 'overcome', 'overpowered'])
         if playerHealth <= 0 or enemyHealth <= 0:
             actionVerb = 'killed'
-        elif abs(playerHealth - enemyHealth) > 25:
-            actionVerb = randListItem(['destroyed', 'obliterated', 'decisively defeated', 'vanquished', 
+        elif healthDifference > 25:
+            actionVerb = randListItem(['destroyed', 'obliterated', 'vanquished', 
                                         'crushed', 'overwhelmed'])
         # end if playerHealth <= 0 ...
 
@@ -144,8 +145,16 @@ def battleEndSummary(playerChar, playerHealth, enemyChar, enemyHealth, numberOfR
             defeatStr = '{} has been {} by {}'.format(playerChar, actionVerb, enemyChar)
         # end if playerHealth > enemyHealth
     # end if playerhealth <= 0
-
-    print(defeatStr + '\n')
+    
+    print(defeatStr)
+    if healthDifference < 5:
+        print('A {}!'.format(randListItem(['close victory', 'hard earned victory', 'close shave', 'narrow victory',
+                                            'evenly-matched battle'])))
+    elif healthDifference > 25:
+        print('A {}!'.format(randListItem(['huge power gap', 'wide divide in skill', 'decisive victory'])))
+    if playerHealth >=0 and playerHealth <3 and enemyHealth>=0 and enemyHealth <3:
+        print('Both parties are barely alive! A {}!'.format(randListItem(['bitter battle', 'close shave'])))
+    print('\n')
     return
 # end def battleEndSummary
 
